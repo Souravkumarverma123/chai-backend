@@ -3,7 +3,6 @@ import {ApiError} from "../utils/ApiError.js";
 import {User} from "../models/user.model.js"
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { json } from "express";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 
@@ -161,7 +160,7 @@ const {email, username, password} = req.body
 })
 
 const logoutUser = asyncHandler(async(req, res) => {
-    User.findByIdAndUpdate(
+    await User.findByIdAndUpdate(
         req.user._id,
         {
             $set: {
@@ -191,7 +190,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
    const incomingRefreshToken = req.cookies.refreshToken  ||  req.body.refreshToken
 
     if (!incomingRefreshToken) {
-        throw ApiError(401, "unauthorized request")
+        throw new ApiError(401, "unauthorized request")
     }
 
     try {
@@ -283,13 +282,13 @@ const updateAccountDetails = asyncHandler(async(req, res) =>{
 })
 
 const updateUserAvatar = asyncHandler(async(req, res) =>{
-   const avatarLcoclPath =  req.file?.path
+   const avatarLocalPath =  req.file?.path
 
-   if (!avatarLcoclPath) {
+   if (!avatarLocalPath) {
         throw new ApiError(400, "Avatar file is missing")
    }
 
-    const avatar = await uploadOnCloudinary(avatarLcoclPath)
+    const avatar = await uploadOnCloudinary(avatarLocalPath)
 
 
     if (!avatar.url) {
@@ -463,7 +462,7 @@ const getWatchHistory = asyncHandler(async(req, res) => {
 
    return res
    .status(200)
-   .json(new ApiResponse(200, user[0].getWatchHistory, "watch history fetched Successfully"))
+   .json(new ApiResponse(200, user[0].watchHistory, "watch history fetched Successfully"))
 })
 
 
